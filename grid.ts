@@ -16,18 +16,20 @@ class Grid{
         this.worldBox = worldSize
         this.gridSize = gridSize
 
-        this.tileSize = new Vector2(0,0)
-        this.tileSize.vals = worldSize.pos.vals.map((val,i) => {
-            return val / gridSize.x
+        this.triggers = createNDimArray(gridSize.vals,(pos) => new Map())
+        this.handles = new Map()
+
+        this.tileSize = new Vector2(0,0).map((arr, i) => {
+            arr[i] = worldSize.size.vals[i] / gridSize.vals[i]
         })
     }
 
     worldPos2GridPos(worldpos):Vector2{
         var relativePos = this.worldBox.pos.to(worldpos);
         relativePos.map((arr,i) => {
-            arr[i] /= this.gridSize.vals[i]
+            arr[i] /= this.tileSize.vals[i]
         })
-        relativePos.map((arr,i) => arr[i] = Math.round(arr[i]) )
+        relativePos.map((arr,i) => arr[i] = Math.floor(arr[i]) )
 		return relativePos;
     }
     
@@ -81,8 +83,11 @@ class Grid{
 
     
 	trigger(v:Vector2):void{
-        for(var val of this.triggers[v.y][v.x].values()){
-            val()
+        var gridBox = new Rect(new Vector2(0,0),this.gridSize.c().sub(new Vector2(1,1)))
+        if(gridBox.collidePoint(v)){
+            for(var val of this.triggers[v.y][v.x].values()){
+                val()
+            }
         }
 	}
 

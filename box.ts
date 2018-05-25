@@ -29,16 +29,16 @@ class Rect{
     }
 
     getEdge(dim:number,takeMax:boolean){
-        var result = this.pos[dim];
+        var result = this.pos.vals[dim];
 		if(takeMax){
-			result += this.size[dim];
+			result += this.size.vals[dim];
 		}
 		return result;
     }
 
     getPoint(relativePos:Vector2){
         var halfsize = this.size.c().scale(0.5);
-		var center = this.pos.add(halfsize);
+		var center = this.pos.c().add(halfsize);
 
 		halfsize.x *= relativePos.x;
 		halfsize.y *= relativePos.y;
@@ -55,7 +55,7 @@ class Rect{
         ctxt.moveTo(tl.x,tl.y)
         ctxt.lineTo(tr.x,tr.y)
         ctxt.lineTo(br.x,br.y)
-        ctxt.lineTo(br.x,br.y)
+        ctxt.lineTo(bl.x,bl.y)
         ctxt.lineTo(tl.x,tl.y)
         ctxt.stroke()
     }
@@ -66,7 +66,7 @@ class Rect{
         this.size.loop((sv) => {
             temp.overwrite(this.pos)
             temp.add(sv)
-            callback(sv)
+            callback(temp)
         })
     }
 }
