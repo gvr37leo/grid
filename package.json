@@ -6,7 +6,8 @@
   "dependencies": {
     "eventsystemx": "^0.3.0",
     "express": "^4.16.3",
-    "utilsx": "^1.7.0",
+    "rect2x": "^1.0.0",
+    "utilsx": "^1.9.0",
     "vectorx": "^2.5.0"
   },
   "devDependencies": {},

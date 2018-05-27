@@ -1,7 +1,8 @@
 /// <reference path="node_modules/utilsx/utils.ts" />
 /// <reference path="node_modules/vectorx/vector.ts" />
 /// <reference path="node_modules/eventsystemx/EventSystem.ts" />
-/// <reference path="box.ts" />
+/// <reference path="node_modules/rect2x/rect.ts" />
+
 
 
 class Grid{
@@ -69,6 +70,10 @@ class Grid{
             location:new Vector2(0,0),
             collidedWith:null,
         }
+    }
+
+    boxCast(){
+        
     }
 
     listen(gridBox:Rect, callback:() => void):number{
