@@ -7,7 +7,7 @@
     "eventsystemx": "^0.3.0",
     "rect2x": "^1.0.4",
     "utilsx": "^1.9.0",
-    "vectorx": "^2.5.0"
+    "vectorx": "^2.5.1"
   },
   "devDependencies": {},
   "scripts": {

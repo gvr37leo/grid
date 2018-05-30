@@ -10,20 +10,15 @@ class PhysicsBody{
     acc:Vector2
 
     update(dt:number){
+        var dst2travelThisFrame = this.vel.c().scale(dt)
 
-        this.collisionBox.pos.add(this.vel.c().scale(dt))
 
-        var getAbsX;
-        var getAbsY;
-
-        var xDir = this.vel.c().scale(dt)
+        var xDir = dst2travelThisFrame.c()
         xDir.y = 0;
-        this.grid.rayCast(this.collisionBox.pos,xDir)
+        var top = this.collisionBox.getPoint(new Vector2(-1,-1))
+        var bottom = this.collisionBox.getPoint(new Vector2(-1,1))
+        var hit = this.grid.boxCast(top,bottom,xDir)
+        this.collisionBox.pos.x += hit.length
 
-
-        var yDir = this.vel.c()
-        yDir.x = 0
-        //raycast x
-        //raycast y
     }
 }

@@ -72,8 +72,20 @@ class Grid{
         }
     }
 
-    boxCast(){
-        
+    boxCast(top:Vector2,bottom:Vector2,dir:Vector2){
+        var length = dir.length()
+        var top2bot = top.to(bottom)
+        var dirnorm = dir.c().normalize()
+
+
+        var curr = top.c()
+        for (let i = 0; i < length; i++) {
+            var result = this.rayCast(curr,top2bot)
+            if(result.hit){
+                return result
+            }
+            curr.add(dirnorm)
+        }
     }
 
     listen(gridBox:Rect, callback:() => void):number{
