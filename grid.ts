@@ -3,7 +3,23 @@
 /// <reference path="node_modules/eventsystemx/EventSystem.ts" />
 /// <reference path="node_modules/rect2x/rect.ts" />
 
+class RayCastResult{
+    hit:boolean
+    length:number
+    location:Vector2
+    collidedWith:any
 
+    constructor(hit,length,location,collidedWith){
+        this.hit = hit
+        this.length = length
+        this.location = location
+        this.collidedWith = collidedWith
+    }
+
+    static noHit(){
+        return new RayCastResult(false,0,new Vector2(0,0),null)
+    }
+}
 
 class Grid{
     worldBox: Rect;
@@ -25,13 +41,18 @@ class Grid{
         })
     }
 
-    worldPos2GridPos(worldpos):Vector2{
+    worldPos2GridPos(worldpos:Vector2):Vector2{
         var relativePos = this.worldBox.pos.to(worldpos);
         relativePos.map((arr,i) => {
             arr[i] /= this.tileSize.vals[i]
         })
         relativePos.map((arr,i) => arr[i] = Math.floor(arr[i]) )
 		return relativePos;
+    }
+
+    gridPos2WorldPos(gridpos:Vector2):Vector2{
+
+        return null
     }
     
     getBoxFromGrisPos(gridpos:Vector2):Rect{
@@ -44,7 +65,7 @@ class Grid{
         return new Rect(pos,this.tileSize.c())
     }
 
-    rayCast(worldpos:Vector2,dir:Vector2){
+    rayCast(worldpos:Vector2, dir:Vector2){
         var gridpos = this.worldPos2GridPos(worldpos)
         var endgrid = this.worldPos2GridPos(worldpos.c().add(dir))
 
@@ -54,37 +75,28 @@ class Grid{
         var length = gridpos.to(endgrid).length()
         for(var i = 0; i < length; i++){
             if(this.wouldCollideGrid(current)){
-                return {
-                    hit:true,
-                    length:1,
-                    location:new Vector2(0,0),
-                    collidedWith:null,
-                }
+                var struckbox = grid.getBoxFromGrisPos(current)
+                var strucklocation = struckbox.getPoint(dir.c().scale(-1))
+
+                return new RayCastResult(true, i, dir.scale(length), null)
             }
             current.add(dir)
         }
         
-        return {
-            hit:true,
-            length:0,
-            location:new Vector2(0,0),
-            collidedWith:null,
-        }
+        return RayCastResult.noHit()
     }
 
+    //world coords
     boxCast(top:Vector2,bottom:Vector2,dir:Vector2){
         var length = dir.length()
         var top2bot = top.to(bottom)
-        var dirnorm = dir.c().normalize()
 
 
-        var curr = top.c()
-        for (let i = 0; i < length; i++) {
-            var result = this.rayCast(curr,top2bot)
+        for (let x = 0; x < length; x += this.tileSize.x) {
+            var result = this.rayCast(new Vector2(x,top.y),top2bot)
             if(result.hit){
                 return result
             }
-            curr.add(dirnorm)
         }
     }
 
