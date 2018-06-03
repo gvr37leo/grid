@@ -5,11 +5,11 @@
 
 class RayCastResult{
     hit:boolean
-    length:number
+    length:Vector2
     location:Vector2
     collidedWith:any
 
-    constructor(hit,length,location,collidedWith){
+    constructor(hit:boolean, length:Vector2, location:Vector2, collidedWith:any){
         this.hit = hit
         this.length = length
         this.location = location
@@ -17,7 +17,7 @@ class RayCastResult{
     }
 
     static noHit(){
-        return new RayCastResult(false,0,new Vector2(0,0),null)
+        return new RayCastResult(false,new Vector2(0,0),new Vector2(0,0),null)
     }
 }
 
@@ -41,17 +41,23 @@ class Grid{
         })
     }
 
+    worldPos2GridPosFloored(worldpos:Vector2):Vector2{
+        return this.floor(this.worldPos2GridPos(worldpos))
+    }
+
     worldPos2GridPos(worldpos:Vector2):Vector2{
         var relativePos = this.worldBox.pos.to(worldpos);
         relativePos.map((arr,i) => {
             arr[i] /= this.tileSize.vals[i]
         })
-        relativePos.map((arr,i) => arr[i] = Math.floor(arr[i]) )
 		return relativePos;
     }
 
-    gridPos2WorldPos(gridpos:Vector2):Vector2{
+    floor(v:Vector):Vector{
+        return v.map((arr,i) => arr[i] = Math.floor(arr[i]))
+    }
 
+    gridPos2WorldPos(gridpos:Vector2):Vector2{
         return null
     }
     
@@ -63,27 +69,6 @@ class Grid{
         })
         pos.add(temp)
         return new Rect(pos,this.tileSize.c())
-    }
-
-    rayCast(worldpos:Vector2, dir:Vector2){
-        var gridpos = this.worldPos2GridPos(worldpos)
-        var endgrid = this.worldPos2GridPos(worldpos.c().add(dir))
-
-        var current = gridpos
-        var dir = gridpos.to(endgrid).normalize()
-        
-        var length = gridpos.to(endgrid).length()
-        for(var i = 0; i < length; i++){
-            if(this.wouldCollideGrid(current)){
-                var struckbox = grid.getBoxFromGrisPos(current)
-                var strucklocation = struckbox.getPoint(dir.c().scale(-1))
-
-                return new RayCastResult(true, i, dir.scale(length), null)
-            }
-            current.add(dir)
-        }
-        
-        return RayCastResult.noHit()
     }
 
     //world coords
@@ -98,6 +83,40 @@ class Grid{
                 return result
             }
         }
+        return RayCastResult.noHit()
+    }
+
+    rayCast(worldpos:Vector2, dir:Vector2){
+        var gridpos = this.worldPos2GridPosFloored(worldpos)
+        var endgrid = this.worldPos2GridPosFloored(worldpos.c().add(dir))
+
+        
+        
+        var length = gridpos.to(endgrid).length()
+        if(this.wouldCollideGrid(gridpos)){
+            return new RayCastResult(true, new Vector2(0,0), worldpos.c(), null)
+        }else{
+            var current = gridpos
+            var dirN = gridpos.to(endgrid).normalize()
+            current.add(dirN)
+            for(var i = 0; i < length; i++){
+                if(this.wouldCollideGrid(current)){
+                    var struckbox = grid.getBoxFromGrisPos(current)
+                    var strucklocation = struckbox.getPoint(dirN.c().scale(-1))
+                    if(dir.x != 0){
+                        strucklocation.y = worldpos.y
+                    }else{
+                        strucklocation.x = worldpos.x
+                    }
+                    return new RayCastResult(true, worldpos.to(strucklocation), strucklocation, null)
+                }
+                current.add(dirN)
+            }    
+        }
+        
+        
+        
+        return new RayCastResult(false,dir,worldpos.c().add(dir),null)
     }
 
     listen(gridBox:Rect, callback:() => void):number{
@@ -136,13 +155,18 @@ class Grid{
     }
 
     wouldCollideWorld(worldPos:Vector2):boolean{
-        var gridpos = this.worldPos2GridPos(worldPos)
+        var gridpos = this.worldPos2GridPosFloored(worldPos)
         return this.wouldCollideGrid(gridpos)
     }
 
     wouldCollideGrid(gridPos:Vector2):boolean{
-        if(this.triggers[gridPos.y][gridPos.x]){
-            return true
+        var box = new Rect(new Vector2(0,0),this.gridSize.c().sub(new Vector2(1,1)))
+        if(box.collidePoint(gridPos)){
+            if(this.triggers[gridPos.y][gridPos.x]){
+                return true
+            }else{
+                return false
+            }
         }else{
             return false
         }
