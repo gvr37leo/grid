@@ -72,21 +72,28 @@ class Grid{
     }
 
     //world coords
-    boxCast(top:Vector2,bottom:Vector2,dir:Vector2){
-        var length = dir.length()
-        var top2bot = top.to(bottom)
+    boxCast(top:Vector2,top2bot:Vector2,dir:Vector2){
+        var bottom = top.c().add(top2bot)
+        var top2botlength = top2bot.length()
+        var top2botN = top2bot.c().normalize()
 
-        var topgrid = this.worldPos2GridPosFloored(top)
-        var botgrid = this.worldPos2GridPosFloored(bottom)
-
-
-        for (let x = 0; x < length; x += this.tileSize.x) {
-            var result = this.rayCast(new Vector2(x,top.y),top2bot)
+        var pos = bottom.c()
+        var counter = 0;
+        while(counter < top2botlength) {
+            var result = this.rayCast(pos,dir)
             if(result.hit){
                 return result
             }
+            pos.add(top2botN.c().mul(this.tileSize))
+            counter += this.tileSize.vals[0]
         }
-        return RayCastResult.noHit()
+
+        var result = this.rayCast(top,dir)
+        if(result.hit){
+            return result
+        }
+
+        return new RayCastResult(false,dir,top.c().add(bottom).scale(0.5).add(dir),null)
     }
 
     rayCast(worldpos:Vector2, dir:Vector2):RayCastResult{

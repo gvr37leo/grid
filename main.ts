@@ -54,6 +54,9 @@ loop((dt) => {
     
     physicsbody.movement = input.c().scale(200)
 
+    var result = grid.boxCast(mousepos,new Vector2(0,50),new Vector2(200,0))
+    result.location.draw(ctxt)
+
     grid.worldBox.draw(ctxt)
     physicsbody.update(dt)
     
