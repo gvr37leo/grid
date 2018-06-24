@@ -76,6 +76,9 @@ class Grid{
         var length = dir.length()
         var top2bot = top.to(bottom)
 
+        var topgrid = this.worldPos2GridPosFloored(top)
+        var botgrid = this.worldPos2GridPosFloored(bottom)
+
 
         for (let x = 0; x < length; x += this.tileSize.x) {
             var result = this.rayCast(new Vector2(x,top.y),top2bot)
@@ -86,12 +89,9 @@ class Grid{
         return RayCastResult.noHit()
     }
 
-    rayCast(worldpos:Vector2, dir:Vector2){
+    rayCast(worldpos:Vector2, dir:Vector2):RayCastResult{
         var gridpos = this.worldPos2GridPosFloored(worldpos)
         var endgrid = this.worldPos2GridPosFloored(worldpos.c().add(dir))
-
-        
-        
         var length = gridpos.to(endgrid).length()
         if(this.wouldCollideGrid(gridpos)){
             return new RayCastResult(true, new Vector2(0,0), worldpos.c(), null)
@@ -102,20 +102,14 @@ class Grid{
             for(var i = 0; i < length; i++){
                 if(this.wouldCollideGrid(current)){
                     var struckbox = grid.getBoxFromGrisPos(current)
-                    var strucklocation = struckbox.getPoint(dirN.c().scale(-1))
-                    if(dir.x != 0){
-                        strucklocation.y = worldpos.y
-                    }else{
-                        strucklocation.x = worldpos.x
-                    }
+                    var out:[number,number] = [0,0]
+                    struckbox.collideLine(worldpos,worldpos.c().add(dir),out)
+                    var strucklocation = worldpos.c().add(dir.c().scale(out[0]));
                     return new RayCastResult(true, worldpos.to(strucklocation), strucklocation, null)
                 }
                 current.add(dirN)
             }    
         }
-        
-        
-        
         return new RayCastResult(false,dir,worldpos.c().add(dir),null)
     }
 
@@ -149,8 +143,9 @@ class Grid{
     
     draw(ctx:CanvasRenderingContext2D){
         this.gridSize.loop(v => {
-            if(true)
-            this.getBoxFromGrisPos(v).draw(ctx)
+            if(this.wouldCollideGrid(v)){
+                this.getBoxFromGrisPos(v).draw(ctx)
+            }
         })
     }
 
@@ -162,7 +157,7 @@ class Grid{
     wouldCollideGrid(gridPos:Vector2):boolean{
         var box = new Rect(new Vector2(0,0),this.gridSize.c().sub(new Vector2(1,1)))
         if(box.collidePoint(gridPos)){
-            if(this.triggers[gridPos.y][gridPos.x]){
+            if(this.triggers[gridPos.y][gridPos.x].size > 0){
                 return true
             }else{
                 return false

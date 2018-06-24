@@ -4,10 +4,14 @@
 
 
 class PhysicsBody{
+
     grid:Grid
     collisionBox:Rect
     vel:Vector2
     acc:Vector2
+    movement:Vector2
+    grounded:boolean[] = [false,false]
+
 
     constructor(grid:Grid,collisionBox:Rect,vel:Vector2,acc:Vector2){
         this.vel = vel
@@ -19,19 +23,29 @@ class PhysicsBody{
     
 
     update(dt:number){
-        var dst2travelThisFrame = this.vel.c().scale(dt)
+        var gravity = new Vector2(0,600)
 
+        this.acc = gravity
+        this.vel.add(this.acc.c().scale(dt))
+        var dst2travelThisFrame = this.vel.c().add(this.movement).scale(dt)
 
-        var xDir = dst2travelThisFrame.c()
-        xDir.y = 0;
-        var top = this.collisionBox.getPoint(new Vector2(-1,-1))
-        var bottom = this.collisionBox.getPoint(new Vector2(-1,1))
-        var result = this.grid.boxCast(top,bottom,xDir)
-        if(result.hit){
-            this.pos.x += result.length.x
-        }else{
-            this.pos.x += xDir.x
+        for (var i = 0; i < 2; i++) {
+            var speed = dst2travelThisFrame.vals[i]
+            var boxedge = new Vector2(0,0)
+            var ray = new Vector2(0,0)
+            boxedge.vals[i] = Math.sign(speed)
+            ray.vals[i] = speed
+            var raycastResult = this.grid.rayCast(this.collisionBox.getPoint(boxedge),ray)
+            if(Math.abs(raycastResult.length.vals[i]) < Math.abs(speed)){
+                this.pos.vals[i] += raycastResult.length.vals[i]
+                this.vel.vals[i] = 0
+                this.grounded[i] = true
+            }else{
+                this.pos.vals[i] += speed
+                this.grounded[i] = false
+            }
         }
+    
     }
 
     get pos():Vector2{

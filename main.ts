@@ -21,34 +21,44 @@ var world = [
 ]
 
 var grid = new Grid(new Rect(new Vector2(100,100), new Vector2(400,400)), new Vector2(10,10))
-var mousepos= new Vector2(450,0)
-// var physicsbody = new PhysicsBody(grid,new Rect(new Vector2(0,0),new Vector2(0,0)),new Vector2(-100,0),new Vector2(0,0))
+var mousepos= new Vector2(200,200)
+var physicsbody = new PhysicsBody(grid,new Rect(new Vector2(100,50),new Vector2(40,80)),new Vector2(0,50),new Vector2(0,0))
 canvas.addEventListener('mousemove',(ev) => {
     mousepos = getMousePos(canvas,ev)
 })
 
-grid.gridSize.loop((pos) => {
-    let box = grid.getBoxFromGrisPos(pos)
-    grid.listen(new Rect(pos.c(), new Vector2(1,1)),() => {
-        box.draw(ctxt)
-    })
+var worldsize = new Vector2(world[0].length,world.length)
+worldsize.loop((pos) => {
+    if(world[pos.y][pos.x] == 1){
+        grid.listen(new Rect(pos.c(), new Vector2(1,1)),() => {
+
+        })
+    }
 })
 
-loop((dt) => {
-    ctxt.clearRect(0,0,600,600)
-    grid.worldBox.draw(ctxt)
-    // physicsbody.update(dt)
-    
-    var result = grid.rayCast(mousepos,new Vector2(0,-100))
-    grid.trigger(grid.worldPos2GridPosFloored(mousepos))
+document.addEventListener('keydown', (e) => {
+    if(e.keyCode == 32 && physicsbody.grounded[1] == true){
+        physicsbody.vel.y -= 400
+    }
+})
 
-    ctxt.strokeStyle = 'black'
-    ctxt.fillStyle = 'black'
-    mousepos.draw(ctxt)
-    ctxt.strokeStyle = 'red'
-    ctxt.fillStyle = 'red'
-    line(ctxt,mousepos,result.location)
-    result.location.draw(ctxt)
-    ctxt.strokeStyle = 'black'
-            
+
+loop((dt) => {
+    dt /= 1000
+    // dt = 0.008
+    ctxt.clearRect(0,0,600,600)
+    var input = getMoveInputYFlipped()
+    input.y = 0;
+    // var input = new Vector2(0,-10000)
+
+    
+    physicsbody.movement = input.c().scale(200)
+
+    grid.worldBox.draw(ctxt)
+    physicsbody.update(dt)
+    
+    grid.draw(ctxt)
+    physicsbody.collisionBox.draw(ctxt)
+    grid.trigger(grid.worldPos2GridPosFloored(mousepos))
+    
 })
