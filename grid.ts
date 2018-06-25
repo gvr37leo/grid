@@ -58,7 +58,7 @@ class Grid{
     }
 
     gridPos2WorldPos(gridpos:Vector2):Vector2{
-        return null
+        return gridpos.mul(this.tileSize).add(this.worldBox.pos)
     }
     
     getBoxFromGrisPos(gridpos:Vector2):Rect{
@@ -76,22 +76,22 @@ class Grid{
         var bottom = top.c().add(top2bot)
         var top2botlength = top2bot.length()
         var top2botN = top2bot.c().normalize()
+        var top2botNHalfed = top2botN.c().scale(0.5)
 
-        var pos = bottom.c()
-        var counter = 0;
-        while(counter < top2botlength) {
-            var result = this.rayCast(pos,dir)
+        var topgrid = this.worldPos2GridPosFloored(top)
+        var botgrid = this.worldPos2GridPosFloored(bottom)
+
+        var current = topgrid.c()
+        while(current.equals(botgrid) == false){
+
+            var worldpos = this.gridPos2WorldPos(current.c().add(top2botNHalfed))
+            var result = this.rayCast(worldpos,dir)
             if(result.hit){
                 return result
             }
-            pos.add(top2botN.c().mul(this.tileSize))
-            counter += this.tileSize.vals[0]
+            current.add(top2botN)
         }
 
-        var result = this.rayCast(top,dir)
-        if(result.hit){
-            return result
-        }
 
         return new RayCastResult(false,dir,top.c().add(bottom).scale(0.5).add(dir),null)
     }

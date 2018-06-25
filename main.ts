@@ -8,7 +8,7 @@ var crret = createCanvas(600,600)
 var canvas = crret.canvas
 var ctxt = crret.ctxt
 var world = [
-    [0,0,0,0,0,0,0,0,0,0],
+    [1,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0,0],
