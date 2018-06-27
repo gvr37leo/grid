@@ -54,12 +54,18 @@ loop((dt) => {
     
     physicsbody.movement = input.c().scale(200)
 
-    var result = grid.boxCast(mousepos,new Vector2(0,50),new Vector2(200,0))
-    result.location.draw(ctxt)
+    var rect = new Rect(mousepos, new Vector2(40, 80))
+    grid.boxCastFromRect(rect,new Vector2(0,100)).draw(ctxt)
+    grid.boxCastFromRect(rect,new Vector2(100,0)).draw(ctxt)
+    rect.draw(ctxt)
+    // var result = grid.boxCast(mousepos,new Vector2(0,50),new Vector2(200,0))
+    // result.location.draw(ctxt)
 
+    ctxt.strokeStyle = 'black'
     grid.worldBox.draw(ctxt)
     physicsbody.update(dt)
     
+    ctxt.strokeStyle = 'black'
     grid.draw(ctxt)
     physicsbody.collisionBox.draw(ctxt)
     grid.trigger(grid.worldPos2GridPosFloored(mousepos))

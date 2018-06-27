@@ -35,7 +35,11 @@ class PhysicsBody{
             var ray = new Vector2(0,0)
             boxedge.vals[i] = Math.sign(speed)
             ray.vals[i] = speed
-            var raycastResult = this.grid.rayCast(this.collisionBox.getPoint(boxedge),ray)
+            // var raycastResult = this.grid.rayCast(this.collisionBox.getPoint(boxedge),ray)
+            // raycastResult.draw(ctxt)
+            var boxcastResult = this.grid.boxCastFromRect(this.collisionBox,ray)
+            var raycastResult = boxcastResult.hitRay
+            raycastResult.draw(ctxt)
             if(Math.abs(raycastResult.length.vals[i]) < Math.abs(speed)){
                 this.pos.vals[i] += raycastResult.length.vals[i]
                 this.vel.vals[i] = 0

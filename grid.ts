@@ -16,9 +16,42 @@ class RayCastResult{
         this.collidedWith = collidedWith
     }
 
-    static noHit(){
-        return new RayCastResult(false,new Vector2(0,0),new Vector2(0,0),null)
+    draw(ctxt:CanvasRenderingContext2D){
+        ctxt.strokeStyle = 'black'
+        line(ctxt,this.location.c().sub(this.length),this.location)
+        if(this.hit){
+            ctxt.fillStyle = 'red'
+        }else{
+            ctxt.fillStyle = 'black'
+        }
+        this.location.draw(ctxt)
     }
+}
+
+class BoxCastResult{
+    hit:boolean
+    firedRays:RayCastResult[]
+    hitRay:RayCastResult
+    rect:Rect
+
+    constructor(hit:boolean, firedRays:RayCastResult[], hitRay:RayCastResult, rect:Rect){
+        this.hit = hit
+        this.firedRays = firedRays
+        this.hitRay = hitRay
+        this.rect = rect
+    }
+
+    draw(ctxt:CanvasRenderingContext2D){
+        if(this.hit){
+            ctxt.strokeStyle = 'red'
+        }
+        this.rect.draw(ctxt)
+        // for(var ray of this.firedRays){
+        //     ray.draw(ctxt)
+        // }
+        this.hitRay.draw(ctxt)
+    }
+    
 }
 
 class Grid{
@@ -71,29 +104,62 @@ class Grid{
         return new Rect(pos,this.tileSize.c())
     }
 
+    rotVector90(v:Vector2):Vector2{
+        var x = -v.y;
+        var y = v.x;
+        v.x = x
+        v.y = y;
+        return v
+    }
+
+    boxCastFromRect(rect:Rect,dir:Vector2):BoxCastResult{
+        if(dir.length() == 0){
+            var zero = new Vector2(0,0)
+            return new BoxCastResult(false,[],new RayCastResult(false,zero,zero,null),new Rect(zero,zero))
+        }
+
+        var dirN = dir.c().normalize()
+        var offset = this.rotVector90(dirN.c())
+        var beginRel = dirN.c().add(offset)
+        var endRel = dirN.c().add(offset.scale(-1))
+
+        var begin = rect.getPoint(beginRel.c())
+        var end = rect.getPoint(endRel.c())
+        var begin2end = begin.to(end)
+
+        return this.boxCast(begin,begin2end,dir)
+    }
+
     //world coords
-    boxCast(top:Vector2,top2bot:Vector2,dir:Vector2){
+    boxCast(top:Vector2,top2bot:Vector2,dir:Vector2):BoxCastResult{
+        var firedRays:RayCastResult[] = []
+        var box = new Rect(top, top2bot.c().add(dir))
         var bottom = top.c().add(top2bot)
-        var top2botlength = top2bot.length()
         var top2botN = top2bot.c().normalize()
-        var top2botNHalfed = top2botN.c().scale(0.5)
 
         var topgrid = this.worldPos2GridPosFloored(top)
         var botgrid = this.worldPos2GridPosFloored(bottom)
+        var gridlength = topgrid.to(botgrid).length()
 
         var current = topgrid.c()
-        while(current.equals(botgrid) == false){
+        var counter = 0;
+        while(counter <= gridlength){
 
-            var worldpos = this.gridPos2WorldPos(current.c().add(top2botNHalfed))
+            var worldpos = this.gridPos2WorldPos(current.c().add(new Vector2(0.5, 0.5)))
             var result = this.rayCast(worldpos,dir)
+            firedRays.push(result)
             if(result.hit){
-                return result
+                var ray = top.to(result.location).project(dir)
+                var start = result.location.c().sub(ray)
+                var hitRay = this.rayCast(start,dir)
+                return new BoxCastResult(true,firedRays,hitRay,box)
             }
             current.add(top2botN)
+            counter++;
         }
 
 
-        return new RayCastResult(false,dir,top.c().add(bottom).scale(0.5).add(dir),null)
+        return new BoxCastResult(true,firedRays,firedRays[0],box)
     }
 
     rayCast(worldpos:Vector2, dir:Vector2):RayCastResult{
