@@ -127,39 +127,64 @@ class Grid{
         var end = rect.getPoint(endRel.c())
         var begin2end = begin.to(end)
 
-        return this.boxCast(begin,begin2end,dir)
+        return this.boxCast2(begin,begin2end,dir)
     }
 
     //world coords
-    boxCast(top:Vector2,top2bot:Vector2,dir:Vector2):BoxCastResult{
+    // boxCast(top:Vector2,top2bot:Vector2,dir:Vector2):BoxCastResult{
+    //     var firedRays:RayCastResult[] = []
+    //     var box = new Rect(top, top2bot.c().add(dir))
+    //     var bottom = top.c().add(top2bot)
+    //     var top2botN = top2bot.c().normalize()
+
+    //     var topgrid = this.worldPos2GridPosFloored(top)
+    //     var botgrid = this.worldPos2GridPosFloored(bottom)
+    //     var gridlength = topgrid.to(botgrid).length()
+
+    //     var current = topgrid.c()
+    //     var counter = 0;
+    //     while(counter <= gridlength){
+
+    //         var worldpos = this.gridPos2WorldPos(current.c().add(new Vector2(0.5, 0.5)))
+    //         var result = this.rayCast(worldpos,dir)
+    //         firedRays.push(result)
+    //         if(result.hit){
+    //             var ray = top.to(result.location).project(dir)
+    //             var start = result.location.c().sub(ray)
+    //             var hitRay = this.rayCast(start,dir)
+    //             return new BoxCastResult(true,firedRays,hitRay,box)
+    //         }
+    //         current.add(top2botN)
+    //         counter++;
+    //     }
+
+
+    //     return new BoxCastResult(true,firedRays,firedRays[0],box)
+    // }
+
+    boxCast2(top:Vector2,top2bot:Vector2,dir:Vector2):BoxCastResult{
         var firedRays:RayCastResult[] = []
+        var skinwidth = 0.01
         var box = new Rect(top, top2bot.c().add(dir))
         var bottom = top.c().add(top2bot)
         var top2botN = top2bot.c().normalize()
+        var top2botlength = top2bot.length()
+        var step = this.tileSize.c().project(top2bot)
 
-        var topgrid = this.worldPos2GridPosFloored(top)
-        var botgrid = this.worldPos2GridPosFloored(bottom)
-        var gridlength = topgrid.to(botgrid).length()
-
-        var current = topgrid.c()
-        var counter = 0;
-        while(counter <= gridlength){
-
-            var worldpos = this.gridPos2WorldPos(current.c().add(new Vector2(0.5, 0.5)))
-            var result = this.rayCast(worldpos,dir)
+        var current = top.c()
+        current.add(top2botN.c().scale(skinwidth))
+        while(top.to(current).length() < top2botlength - skinwidth){
+            var result = this.rayCast(current,dir)
             firedRays.push(result)
             if(result.hit){
-                var ray = top.to(result.location).project(dir)
-                var start = result.location.c().sub(ray)
-                var hitRay = this.rayCast(start,dir)
-                return new BoxCastResult(true,firedRays,hitRay,box)
+                return new BoxCastResult(true,firedRays,result,box);
             }
-            current.add(top2botN)
-            counter++;
+            current.add(step)
         }
+        var result = this.rayCast(bottom.c().sub(top2botN.c().scale(skinwidth)),dir)
+        firedRays.push(result)
 
-
-        return new BoxCastResult(true,firedRays,firedRays[0],box)
+        return new BoxCastResult(true,firedRays,firedRays[0],box);
     }
 
     rayCast(worldpos:Vector2, dir:Vector2):RayCastResult{
