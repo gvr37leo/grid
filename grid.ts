@@ -46,10 +46,10 @@ class BoxCastResult{
             ctxt.strokeStyle = 'red'
         }
         this.rect.draw(ctxt)
-        // for(var ray of this.firedRays){
-        //     ray.draw(ctxt)
-        // }
-        this.hitRay.draw(ctxt)
+        for(var ray of this.firedRays){
+            ray.draw(ctxt)
+        }
+        // this.hitRay.draw(ctxt)
     }
     
 }
@@ -183,8 +183,11 @@ class Grid{
         }
         var result = this.rayCast(bottom.c().sub(top2botN.c().scale(skinwidth)),dir)
         firedRays.push(result)
+        if(result.hit){
+            return new BoxCastResult(true,firedRays,firedRays[0],box);
+        }
 
-        return new BoxCastResult(true,firedRays,firedRays[0],box);
+        return new BoxCastResult(false,firedRays,firedRays[0],box);
     }
 
     rayCast(worldpos:Vector2, dir:Vector2):RayCastResult{
