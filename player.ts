@@ -2,7 +2,6 @@
 
 class Player{
     
-    
     constructor(image:HTMLImageElement, physicsBody:PhysicsBody){
 
     }

@@ -127,10 +127,10 @@ class Grid{
         var end = rect.getPoint(endRel.c())
         var begin2end = begin.to(end)
 
-        return this.boxCast2(begin,begin2end,dir)
+        return this.boxCast(begin,begin2end,dir)
     }
 
-    boxCast2(top:Vector2,top2bot:Vector2,dir:Vector2):BoxCastResult{
+    boxCast(top:Vector2,top2bot:Vector2,dir:Vector2):BoxCastResult{
         var firedRays:RayCastResult[] = []
         var skinwidth = 0.01
         var box = new Rect(top, top2bot.c().add(dir))
