@@ -4,7 +4,28 @@
 /// <reference path="physicsBody.ts" />
 /// <reference path="tileMapDrawer.ts" />
 
+function loadImages(urls:string[]):Promise<HTMLImageElement[]>{
+    var promises:Promise<HTMLImageElement>[] = []
+    for (let i = 0; i < urls.length; i++) {
+        
+        const url = urls[i];
+        let image = new Image()
+        image.src = url
+        let promise = new Promise<HTMLImageElement>((resolve, reject) => {
+            image.onload = function(){
+                resolve(image)
+            }    
+        })
+        promises.push(promise)
+        
+    }
+    
+    return Promise.all(promises)
+}
 
+function drawImage(ctxt:CanvasRenderingContext2D, image:HTMLImageElement, pos:Vector2, size:Vector2){
+    ctxt.drawImage(image,pos.x,pos.y,size.x,size.y)
+}
 
 var crret = createCanvas(600,600)
 var canvas = crret.canvas
